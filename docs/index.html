@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RadVox Uygunluk — Bilgisayarınız Türkçe radyoloji diktesini kaldırır mı?</title>
+<meta name="description" content="Bilgisayarınıza bakar, RadVox'u nasıl çalıştıracağını söyler. Kurulum yok, indirme yok, birkaç saniye.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Bilgisayarınız Türkçe radyoloji diktesini kaldırır mı?">
+<meta property="og:description" content="Sayfayı açın, birkaç saniyede öğrenin. Kurulum yok, indirme yok. RadVox.AI uygunluk aracı.">
+<meta property="og:image" content="https://raw.githubusercontent.com/Coder-Radiologist/radvox-compatibility/master/docs/RadVox.png">
+<meta property="og:image:alt" content="RadVox.AI rapor editörü ekranı">
+<meta property="og:locale" content="tr_TR">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+:root{
+  --ink:#111827; --mavi:#3b82f6; --mor:#7C3AED; --gri:#6b7280;
+  --cizgi:#e5e7eb; --zemin:#f3f4f6; --kart:#ffffff;
+  --ok:#15803d; --uyari:#b45309; --hata:#b91c1c; --bilgi:#1d4ed8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--zemin);color:var(--ink);
+  font:16px/1.6 "Segoe UI",system-ui,-apple-system,Arial,sans-serif}
+.sayfa{max-width:1000px;margin:0 auto;padding:0 18px 72px}
+header{background:var(--kart);border-bottom:3px solid var(--mavi);padding:26px 0 22px}
+.ust{max-width:1000px;margin:0 auto;padding:0 18px}
+.marka{font:700 32px/1 "Courier New",Courier,monospace;letter-spacing:-.5px}
+.marka .r{color:var(--ink)} .marka .v{color:var(--mavi)} .marka .a{color:var(--mor)}
+h1{font-size:clamp(22px,4vw,31px);line-height:1.25;margin:20px 0 10px}
+.giris{color:#374151;max-width:66ch;margin:0}
+.kucuk{font-size:13.5px;color:var(--gri)}
+
+/* Ürün fotoğrafı */
+.urun{margin:22px 0 0;padding:0}
+.urun img{display:block;width:100%;height:auto;border-radius:10px;
+  border:1px solid var(--cizgi);box-shadow:0 2px 10px rgba(0,0,0,.10)}
+.urun figcaption{font-size:12.5px;color:var(--gri);margin-top:8px;
+  max-width:74ch;line-height:1.5}
+
+/* Ölçüm durumu */
+#olcum{background:var(--kart);border-radius:12px;padding:26px;margin:26px 0;
+  box-shadow:0 1px 3px rgba(0,0,0,.09);text-align:center}
+.spinner{width:26px;height:26px;border:3px solid var(--cizgi);
+  border-top-color:var(--mavi);border-radius:50%;animation:d .8s linear infinite;
+  margin:0 auto 12px}
+@keyframes d{to{transform:rotate(360deg)}}
+
+/* Karne */
+.karne{background:var(--kart);border-radius:12px;padding:24px;
+  box-shadow:0 1px 3px rgba(0,0,0,.09);border-left:8px solid var(--mavi)}
+.rozet{display:inline-block;padding:5px 14px;border-radius:999px;color:#fff;
+  font-weight:700;font-size:13px}
+.karne h2{margin:12px 0 8px;font-size:clamp(20px,3.4vw,26px);line-height:1.25;
+  border:0;padding:0}
+.karne p{margin:0;color:#374151;max-width:70ch}
+.kutular{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:14px;margin:22px 0}
+.kutu{background:var(--kart);border-radius:10px;padding:15px 17px;
+  box-shadow:0 1px 3px rgba(0,0,0,.07);border-top:3px solid var(--mavi)}
+.kutu .etiket{font-size:11.5px;text-transform:uppercase;letter-spacing:1.1px;
+  color:var(--gri);font-weight:600}
+.kutu .deger{font-size:22px;font-weight:700;margin:5px 0 2px;line-height:1.2}
+.kutu .alt{font-size:12.5px;color:var(--gri)}
+
+h2{font-size:18px;margin:36px 0 12px;padding-bottom:7px;
+  border-bottom:2px solid var(--cizgi)}
+h2 span{color:var(--gri);font-weight:400;font-size:13.5px}
+table{width:100%;border-collapse:collapse;background:var(--kart);border-radius:10px;
+  overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07);font-size:14.5px}
+th{background:#eef2f7;text-align:left;padding:10px 12px;font-size:12.5px;
+  text-transform:uppercase;letter-spacing:.5px;color:#374151}
+td{padding:10px 12px;border-top:1px solid var(--cizgi);vertical-align:top}
+td.sayi{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.secili td{background:#eff6ff;font-weight:600}
+tr.solgun td{color:#9ca3af}
+.kaydir{overflow-x:auto} .kaydir table{min-width:720px}
+.d{font-weight:700;white-space:nowrap}
+.d-ok{color:var(--ok)} .d-uyari{color:var(--uyari)}
+.d-hata{color:var(--hata)} .d-bilgi{color:var(--bilgi)}
+.aciklama{display:block;color:var(--gri);font-size:12.5px;margin-top:3px;
+  font-weight:400;max-width:70ch}
+ul.mesaj{list-style:none;padding:0;margin:0}
+ul.mesaj li{background:var(--kart);border-left:5px solid var(--gri);border-radius:7px;
+  padding:11px 15px;margin-bottom:9px;font-size:14.5px;
+  box-shadow:0 1px 2px rgba(0,0,0,.06)}
+li.m-hata{border-left-color:var(--hata)} li.m-uyari{border-left-color:var(--uyari)}
+li.m-bilgi{border-left-color:var(--bilgi)}
+li.mesaj-b b{display:block;font-size:12px;text-transform:uppercase;
+  letter-spacing:.7px;margin-bottom:3px}
+.oz{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px}
+.oz-sat{background:var(--kart);border-radius:8px;padding:11px 14px;
+  box-shadow:0 1px 2px rgba(0,0,0,.06);display:flex;gap:11px;align-items:flex-start}
+.im{font-size:17px;line-height:1.35;flex:0 0 auto}
+.oz-sat .ad{font-weight:600;font-size:14.5px}
+.oz-sat .nt{font-size:12.5px;color:var(--gri);margin-top:2px}
+.yok .ad{color:#9ca3af}
+.notlar{background:#fffbeb;border:1px solid #fcd34d;border-radius:9px;
+  padding:14px 17px;font-size:14px;color:#78350f;margin-top:14px}
+.notlar b{display:block;margin-bottom:4px}
+
+/* İndirme çağrısı */
+.cta{background:linear-gradient(135deg,#1e3a8a,#7C3AED);color:#fff;border-radius:12px;
+  padding:26px;margin:32px 0 0}
+.cta h2{color:#fff;border:0;margin:0 0 8px;padding:0;font-size:20px}
+.cta p{margin:0 0 16px;opacity:.92;max-width:64ch;font-size:15px}
+.dugme{display:inline-block;background:#fff;color:#1e3a8a;text-decoration:none;
+  font-weight:700;padding:13px 26px;border-radius:999px;font-size:15.5px}
+.dugme:hover{background:#eef2ff}
+.cta .kucuk{color:#fff;opacity:.8;margin-top:14px;font-size:13px}
+.cta a.ince{color:#fff;text-decoration:underline}
+
+/* Kart seçimi (tarayıcı göremediğinde) */
+.secim{background:#fff7ed;border:1px solid #fdba74;border-radius:9px;
+  padding:14px 16px;margin-top:14px}
+.secim label{display:block;margin-bottom:8px;font-size:14.5px}
+.secim select{width:100%;max-width:460px;padding:10px 12px;font-size:15px;
+  border:1px solid #d1d5db;border-radius:8px;background:#fff;color:var(--ink)}
+.secim code{background:#fff;border:1px solid #e5e7eb;border-radius:4px;
+  padding:1px 5px;font-size:12.5px}
+
+/* Mobil uyarısı */
+#mobil{background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;
+  padding:22px;margin:26px 0;display:none}
+#mobil h2{margin:0 0 8px;border:0;padding:0;font-size:19px;color:#78350f}
+#mobil p{margin:0 0 14px;color:#78350f;font-size:15px}
+#kopyala{background:#78350f;color:#fff;border:0;border-radius:999px;
+  padding:12px 22px;font-size:15px;font-weight:600;cursor:pointer}
+footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--cizgi);
+  font-size:12.5px;color:var(--gri);line-height:1.75}
+footer a{color:var(--gri)}
+@media (max-width:520px){ .karne{padding:18px} .kutu .deger{font-size:20px} }
+</style>
+</head>
+<body>
+<header><div class="ust">
+  <div class="marka"><span class="r">Rad</span><span class="v">Vox</span><span class="a">.AI</span></div>
+</div></header>
+
+<div class="sayfa">
+  <h1>Bilgisayarınız Türkçe radyoloji diktesini kaldırır mı?</h1>
+  <p class="giris">Bu sayfa tarayıcınızın görebildiği kadarıyla bilgisayarınıza
+  bakar ve RadVox'u nasıl çalıştıracağını söyler. Kurulum yok, indirme yok,
+  hiçbir veri gönderilmez.</p>
+
+  <figure class="urun">
+    <img src="RadVox.png" width="1400" height="835"
+         alt="RadVox.AI rapor editörü: solda hızlı rapor giriş formları, ortada rapor editörü ve dikte, sağda AI asistan">
+    <figcaption><b>Uygunluğunu ölçtüğünüz program: RadVox.AI</b> — solda
+    hızlı rapor giriş formları, ortada rapor editörü ve sesli dikte,
+    sağda AI asistan.</figcaption>
+  </figure>
+
+  <div id="mobil">
+    <h2>Telefondasınız</h2>
+    <p>Bu araç <b>rapor yazdığınız bilgisayarı</b> ölçer, telefonu değil.
+    Bağlantıyı bilgisayarınızda açın; sonuç birkaç saniyede çıkar.</p>
+    <button id="kopyala">Bağlantıyı kopyala</button>
+    <p class="kucuk" id="kopyalandi" style="display:none;margin-top:10px">
+      Kopyalandı — bilgisayarınızda tarayıcıya yapıştırın.</p>
+  </div>
+
+  <div id="olcum"><div class="spinner"></div>
+    <div class="kucuk">Bilgisayarınıza bakılıyor…</div></div>
+
+  <div id="sonuc" style="display:none"></div>
+
+  <footer>
+    Bu sayfa tarayıcının API'leri üzerinden ölçüm yapar ve <b>hiçbir veri
+    göndermez</b>; sonuç yalnızca sizin ekranınızda oluşur.
+    Hız ve doğruluk sayıları <b>öngörüdür</b> — model büyüklüğü ve donanım
+    sınıfına dayanan tahmindir, bu bilgisayarda çalıştırılmış bir ölçüm
+    değildir. Tarayıcı ekran kartı belleğini ve sürücü sürümünü göremediği
+    için kademe kararı temkinli verilir; kesin sonuç için
+    <a href="https://github.com/Coder-Radiologist/radvox-compatibility/releases/latest">masaüstü aracını</a> kullanın.
+    <br>Kaynak kod: <a href="https://github.com/Coder-Radiologist/radvox-compatibility">github.com/Coder-Radiologist/radvox-compatibility</a>
+    · RadVox.AI uygunluk aracı s<span id="surum"></span>
+  </footer>
+</div>
+
+<script>
+const TABLOLAR = {"surum":"1.2","urun":"RadVox.AI","ister":{"ram_gb_min":8,"ram_gb_onerilen":16,"cekirdek_min":4,"cekirdek_onerilen":8,"disk_gb_min":8,"disk_gb_onerilen":20,"vram_gb_large":6,"vram_gb_orta":4,"ekran_gen_min":1366,"ekran_gen_onerilen":1920,"win_build_min":19041,"macos_min":12,"nvidia_surucu_min":528.0,"cc_min":6.0,"cc_max":9.0,"paket_gb":5.0},"modeller":{"large-v3":{"ad":"Whisper large-v3","parametre":"1.55 milyar","vram":4.7,"ram":3.1,"disk":3.09,"hiz":1.0,"hiz_cpu":1.0,"wer":[8,12,4,7],"not":"En yüksek doğruluk. Uzun anatomik terimlerde ve nadir kısaltmalarda farkı burada görürsünüz."},"large-v3-turbo":{"ad":"Whisper large-v3-turbo","parametre":"809 milyon","vram":2.6,"ram":1.7,"disk":1.62,"hiz":3.5,"hiz_cpu":2.5,"wer":[9,14,5,8],"not":"large-v3'ün 4 katmanlı çözücüsü. Doğruluk farkı küçük, hız farkı büyük — orta sınıf donanımda en iyi denge."},"medium":{"ad":"Whisper medium","parametre":"769 milyon","vram":2.6,"ram":1.6,"disk":1.53,"hiz":2.0,"hiz_cpu":2.2,"wer":[15,22,10,15],"not":"Türkçe tıbbi terimlerde belirgin düşüş: 'kostofrenik', 'peribronsiyal' gibi kelimeler bozulmaya başlar."},"small":{"ad":"Whisper small","parametre":"244 milyon","vram":1.2,"ram":0.8,"disk":0.48,"hiz":4.0,"hiz_cpu":4.5,"wer":[25,35,20,28],"not":"Dikte için önerilmez; düzeltme süresi yazma süresini geçer."},"base":{"ad":"Whisper base","parametre":"74 milyon","vram":0.7,"ram":0.4,"disk":0.14,"hiz":8.0,"hiz_cpu":9.0,"wer":[40,55,35,48],"not":"Yalnızca 'açılmıyor mu' testi için. Rapor üretilemez."}},"model_sira":["large-v3","large-v3-turbo","medium","small","base"],"gpu_siniflari":[["\\b(50[89]0|5090|5080)\\b",3.4,"GeForce RTX 50 serisi (Blackwell)"],["\\b(507[05]|5060)\\b",2.0,"GeForce RTX 50 serisi (Blackwell)"],["\\b(4090)\\b",3.0,"GeForce RTX 4090"],["\\b(4080)\\b",2.4,"GeForce RTX 4080"],["\\b(4070)\\b",1.8,"GeForce RTX 4070"],["\\b(4060)\\b",1.1,"GeForce RTX 4060"],["\\b(3090)\\b",2.2,"GeForce RTX 3090"],["\\b(3080)\\b",1.9,"GeForce RTX 3080"],["\\b(3070)\\b",1.4,"GeForce RTX 3070"],["\\b(3060\\s*ti)\\b",1.3,"GeForce RTX 3060 Ti"],["\\b(3060|3050)\\b",1.0,"GeForce RTX 30 serisi"],["\\b(2080|2070)\\b",1.0,"GeForce RTX 20 serisi"],["\\b(2060|1660|1650)\\b",0.65,"GeForce RTX 2060 / GTX 16 serisi"],["\\b(10[6-8]0)\\b",0.45,"GeForce GTX 10 serisi (Pascal)"],["\\b(105\\d)\\b",0.28,"GeForce GTX 1050 (Pascal, giriş seviyesi)"],["\\b(1030|9[05]0m?|mx\\d{3})\\b",0.18,"Giriş seviyesi / dizüstü NVIDIA"],["\\b(h100|h200|b200)\\b",5.0,"Veri merkezi hızlandırıcı"],["\\b(a100|l40|l4|a6000|a5000|a4000)\\b",2.4,"Profesyonel NVIDIA"],["\\b(t4|p100|v100)\\b",0.9,"Veri merkezi (önceki kuşak)"],["\\brtx\\s*a\\d{4}\\b",1.5,"NVIDIA RTX A serisi"],["\\brtx\\s*[3-8]000\\b",2.4,"NVIDIA RTX profesyonel (Ada/Blackwell)"],["\\bquadro\\b",0.8,"Quadro"]],"apple_siniflari":[["m4\\s*(max|ultra)",1.6,"Apple M4 Max/Ultra"],["m4\\s*pro",1.35,"Apple M4 Pro"],["m4",1.1,"Apple M4"],["m3\\s*(max|ultra)",1.35,"Apple M3 Max/Ultra"],["m3\\s*pro",1.1,"Apple M3 Pro"],["m3",0.9,"Apple M3"],["m2\\s*(max|ultra)",1.15,"Apple M2 Max/Ultra"],["m2\\s*pro",1.0,"Apple M2 Pro"],["m2",0.75,"Apple M2"],["m1\\s*(max|ultra)",0.95,"Apple M1 Max/Ultra"],["m1\\s*pro",0.85,"Apple M1 Pro"],["m1",0.55,"Apple M1"]],"cpu_kusak":[["core.{0,6}ultra\\s*[3579]",1.3,"Intel Core Ultra"],["i[3579][\\s-]*1[4-9]\\d{2,3}",1.3,"Intel Core 14. kuşak ve üstü"],["i[3579][\\s-]*1[23]\\d{2,3}",1.2,"Intel Core 12-13. kuşak"],["i[3579][\\s-]*1[01]\\d{2,3}",1.0,"Intel Core 10-11. kuşak"],["i[3579][\\s-]*[89]\\d{2,3}",0.85,"Intel Core 8-9. kuşak"],["i[3579][\\s-]*[4-7]\\d{2,3}",0.65,"Intel Core 4-7. kuşak"],["i[3579][\\s-]*[23]\\d{2,3}",0.45,"Intel Core 2-3. kuşak (çok eski)"],["ryzen\\s*[3579]\\s*(pro\\s*)?9\\d{3}",1.35,"AMD Ryzen 9000 serisi"],["ryzen\\s*[3579]\\s*(pro\\s*)?[78]\\d{3}",1.25,"AMD Ryzen 7000/8000 serisi"],["ryzen\\s*[3579]\\s*(pro\\s*)?[56]\\d{3}",1.05,"AMD Ryzen 5000/6000 serisi"],["ryzen\\s*[3579]\\s*(pro\\s*)?[34]\\d{3}",0.9,"AMD Ryzen 3000/4000 serisi"],["ryzen|threadripper",0.85,"AMD Ryzen"],["apple\\s*m\\d",1.2,"Apple Silicon"],["xeon",0.8,"Intel Xeon"],["celeron|pentium|atom|\\bn\\d{3,4}\\b",0.35,"Giriş seviyesi CPU"],["snapdragon|oryon",0.7,"Qualcomm Snapdragon (Windows on ARM)"]],"vram_tahmini":{"GeForce RTX 50 serisi (Blackwell)":16,"GeForce RTX 4090":24,"GeForce RTX 4080":16,"GeForce RTX 4070":12,"GeForce RTX 4060":8,"GeForce RTX 3090":24,"GeForce RTX 3080":10,"GeForce RTX 3070":8,"GeForce RTX 3060 Ti":8,"GeForce RTX 30 serisi":8,"GeForce RTX 20 serisi":8,"GeForce RTX 2060 / GTX 16 serisi":6,"GeForce GTX 10 serisi (Pascal)":8,"GeForce GTX 1050 (Pascal, giriş seviyesi)":4,"Giriş seviyesi / dizüstü NVIDIA":2,"Veri merkezi hızlandırıcı":80,"Profesyonel NVIDIA":24,"Veri merkezi (önceki kuşak)":16,"NVIDIA RTX A serisi":16,"NVIDIA RTX profesyonel (Ada/Blackwell)":24,"Quadro":5,"NVIDIA (sınıflandırılamadı)":6},"kademe":{"A":["Tam performans","#15803d"],"B":["Çalışır — hafif model","#0d9488"],"C":["Çalışır — dikte CPU'da","#b45309"],"D":["Elle rapor modu","#6d28d9"],"X":["Desteklenmiyor","#b91c1c"]},"kademe_metni":{"A":["Bu bilgisayar {urun} uygulamasını tam performansta çalıştırır.","Ekran kartı dikteyi üstlenir; en büyük ve en doğru model olan {model} sorunsuz yüklenir. Cümleyi bitirdiğinizde metin pratik olarak aynı anda ekranda olur."],"B":["{urun} bu bilgisayarda tam sürümüyle çalışır.","Ekran kartı dikteyi üstlenir, ancak belleği en büyük modele yetmediği için {model} kullanılır. Hız farkı hissedilmez; doğruluk farkı nadir terimlerde ortaya çıkar."],"C":["{urun} çalışır — dikte CPU üzerinde.","Uygun bir NVIDIA kartı bulunmadığı için çözümleme CPU'da yapılır ve {model} kullanılır. Program eksiksizdir; yalnızca konuştuktan sonra metnin gelmesi birkaç saniye sürer."],"D":["Sesli dikte için bu bilgisayar yeterli değil.","Üzgünüz — bu donanımda kullanılabilir doğrulukta bir model çalışmıyor, dikteyi önermiyoruz. Ama {urun} elle rapor yazmak için hâlâ çok iyi: hızlı rapor giriş formları, akıllı tamamlama, kişisel sözlük, önceki tetkikle karşılaştırma ve RIS'e biçimli yapıştırma donanımdan tamamen bağımsız çalışır ve rapor sürenizi tek başına belirgin kısaltır."],"X":["Bu bilgisayar desteklenen sınırın altında.","Aşağıdaki engeller giderilmeden kurulum önerilmez."]},"ozellikler":[{"ad":"Rapor editörü ve hızlı rapor giriş formları","kosul":"her_zaman","not":"Şablondan tam rapor üretimi. Donanımdan bağımsız çalışır."},{"ad":"Akıllı tamamlama ve kişisel sözlük","kosul":"her_zaman","not":"Öğrenen ifade havuzu, kısaltma genişletme; CPU gücü gerektirmez."},{"ad":"Ölçüm ve RECIST paneli","kosul":"her_zaman","not":"Hesaplamalar yerel, anında."},{"ad":"Önceki tetkikle karşılaştırma","kosul":"her_zaman","not":"Lezyon eşleme ve değişim cümleleri; dikte olmadan da kullanılır."},{"ad":"Rapor kalite kontrolü","kosul":"her_zaman","not":"Eksik alan, çelişen ifade ve ölçü tutarsızlığı denetimi."},{"ad":"RIS'e biçimli yapıştırma","kosul":"windows","not":"Windows'ta CF_HTML + RTF ile Word paritesi.","not_alt":"macOS'ta public.html / public.rtf yolu kullanılır."},{"ad":"Sesli dikte","kosul":"dikte","not":"%(cihaz)s üzerinde %(model)s","not_alt":"Bu donanımda dikte pratik değil; program elle yazma modunda tam işlevli."},{"ad":"Sesli noktalama ve komutlar","kosul":"dikte","not":"'yeni satır', 'nokta', 'paragraf' gibi komutlar dikte ile birlikte gelir.","not_alt":"Dikte kapalıyken sesli komutlar da devre dışı."},{"ad":"GPU hızlandırmalı dikte","kosul":"gpu","not":"Cümle biter bitmez metin ekranda.","not_alt":"CPU modunda metin birkaç saniye sonra gelir."},{"ad":"AI asistan (düzeltme, özet, öneri)","kosul":"internet","not":"İnternet bağlantısı ve API anahtarı gerekir. Kapatılabilir; kapalıyken sistem tamamen çevrimdışı çalışır."},{"ad":"Otomatik güncelleme","kosul":"internet","not":"İnternet gerekir."}],"sabitler":{"gpu_taban_xrt":8.0,"cpu_taban_xrt":1.0,"zaman_damgasi_carpani":0.85,"baslangic_gecikmesi":{"gpu":0.4,"cpu":0.8}},"wer_metni":"\n<div class=\"notlar\"><b>Bu sayılar öngörüdür, bu bilgisayarda yapılmış ölçüm değildir.<\/b>\nModel büyüklüğü, donanım sınıfı ve saha gözlemine dayanır. Gerçek sonuç\nmikrofon kalitesine, ortam gürültüsüne, konuşma hızına ve tetkik türüne\ngöre değişir — en çok da mikrofona. Kendi sesinizle gerçek rakamı ölçmek\non dakikalık iştir: bilinen bir raporu okuyun, çıktı ile karşılaştırın.\nYaka veya masa mikrofonu yerine gürültü bastırmalı bir kulaklık mikrofonu,\ntek başına modeli bir basamak yükseltmeye denk gelir.<\/div>\n"};
+const RELEASE_URL = "https://github.com/Coder-Radiologist/radvox-compatibility/releases/latest";
+</script>
+<script>
+/* ------------------------------------------------------------------
+   Tarayıcı sürümü. Bilgi tabanı (model tablosu, GPU/CPU sınıfları, WER,
+   kademe metinleri, özellik matrisi) TABLOLAR'dan gelir — tek kaynak
+   Python tarafındaki radvox_uygunluk.py'dir.
+
+   Karar mantığı exe ile aynı değildir, olamaz: tarayıcı VRAM'i, sürücü
+   sürümünü, compute capability'yi ve gerçek RAM'i göremez. Bu yüzden
+   burada kasıtlı olarak TEMKİNLİ davranılır — belirsizlikte kademe
+   aşağı yuvarlanır ve eksik bilgi rapora açıkça yazılır.
+   ------------------------------------------------------------------ */
+
+const E = (x) => String(x == null ? "" : x)
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;");
+
+function esle(tablo, metin) {
+  const m = (metin || "").toLowerCase();
+  for (const [desen, endeks, ad] of tablo) {
+    let re;
+    try { re = new RegExp(desen, "i"); } catch (e) { continue; }
+    if (re.test(m)) return [endeks, ad];
+  }
+  return [null, ""];
+}
+
+/* ---------- Tespit ---------- */
+/* Dizüstülerde tarayıcı WebGL bağlamını varsayılan olarak GÜÇ TASARRUFLU
+   grafik biriminde açar — yani ayrı NVIDIA kartı olan makinede bile "Intel"
+   döner. powerPreference ile ayrı kart istenir; yine de garanti değildir,
+   o yüzden iki bağlamın sonucu birleştirilip NVIDIA olan tercih edilir. */
+function webglAdlari() {
+  const adlar = [];
+  for (const tercih of ["high-performance", "default"]) {
+    try {
+      const c = document.createElement("canvas");
+      const se = { powerPreference: tercih, failIfMajorPerformanceCaveat: false };
+      const gl = c.getContext("webgl", se) ||
+                 c.getContext("experimental-webgl", se);
+      if (!gl) continue;
+      const d = gl.getExtension("WEBGL_debug_renderer_info");
+      if (!d) continue;
+      const ad = String(gl.getParameter(d.UNMASKED_RENDERER_WEBGL) || "");
+      if (ad && !adlar.includes(ad)) adlar.push(ad);
+    } catch (e) { /* bağlam açılmadı */ }
+  }
+  return adlar;
+}
+
+async function webgpuAdi() {
+  try {
+    if (!navigator.gpu) return "";
+    const a = await navigator.gpu.requestAdapter(
+      { powerPreference: "high-performance" });
+    if (!a) return "";
+    const i = a.info || {};
+    return [i.vendor, i.architecture, i.device, i.description]
+      .filter(Boolean).join(" ");
+  } catch (e) { return ""; }
+}
+
+/* Aday adlar içinden ayrı ekran kartını seç. Yerleşik grafik birimi
+   yalnızca başka aday yoksa kullanılır. */
+function gpuSec(adaylar) {
+  const ayrik = adaylar.find((a) => /nvidia|geforce|quadro|tesla|radeon\s*(rx|pro)/i.test(a));
+  return { secilen: ayrik || adaylar[0] || "", hepsi: adaylar,
+           yalnizYerlesik: !ayrik && adaylar.length > 0 };
+}
+
+async function mikrofonSayisi() {
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices)
+      return null;
+    const d = await navigator.mediaDevices.enumerateDevices();
+    return d.filter((x) => x.kind === "audioinput").length;
+  } catch (e) { return null; }
+}
+
+async function isletimSistemi() {
+  const ua = navigator.userAgent || "";
+  const veri = { ad: "", surum: "", mac: /Mac/i.test(ua), win: /Windows/i.test(ua) };
+  try {
+    if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+      const h = await navigator.userAgentData.getHighEntropyValues(
+        ["platformVersion", "architecture"]);
+      const bas = parseInt((h.platformVersion || "0").split(".")[0], 10);
+      if (veri.win && bas) veri.ad = bas >= 13 ? "Windows 11" : "Windows 10";
+      veri.surum = h.platformVersion || "";
+    }
+  } catch (e) { /* Chromium dışı */ }
+  if (!veri.ad) {
+    if (veri.win) veri.ad = "Windows";
+    else if (veri.mac) veri.ad = "macOS";
+    else if (/Linux/i.test(ua)) veri.ad = "Linux";
+    else veri.ad = "Bilinmiyor";
+  }
+  return veri;
+}
+
+async function diskBos() {
+  try {
+    const q = await navigator.storage.estimate();
+    // Tarayıcı kotası boş alanın bir kesridir; alt sınır olarak kullanılır.
+    return q && q.quota ? q.quota / 1073741824 : null;
+  } catch (e) { return null; }
+}
+
+async function tespit() {
+  const [os, mik, disk, wgpu] = await Promise.all(
+    [isletimSistemi(), mikrofonSayisi(), diskBos(), webgpuAdi()]);
+  const adaylar = webglAdlari();
+  if (wgpu) adaylar.push(wgpu);
+  const gpu = gpuSec(adaylar);
+  return {
+    os: os,
+    gpuMetin: gpu.secilen,
+    gpuAdaylari: gpu.hepsi,
+    yalnizYerlesik: gpu.yalnizYerlesik,
+    isParcacigi: navigator.hardwareConcurrency || 0,
+    ramIpucu: navigator.deviceMemory || 0,   // Chrome, 8 GB'da tavanlı
+    ekran: [screen.width, screen.height],
+    mikrofon: mik,
+    diskGb: disk,
+    mobil: /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+           (navigator.maxTouchPoints > 1 && screen.width < 900),
+  };
+}
+
+/* Tarayıcı ayrı kartı göstermediğinde kullanıcıya sorulacak liste.
+   Sınıf açıklamaları ve VRAM tahminleri bilgi tabanından gelir. */
+function kartSecenekleri() {
+  const gorulen = new Set(), liste = [];
+  for (const [, endeks, ad] of TABLOLAR.gpu_siniflari) {
+    if (gorulen.has(ad)) continue;
+    gorulen.add(ad);
+    liste.push({ ad: ad, endeks: endeks,
+                 vram: TABLOLAR.vram_tahmini[ad] || 6 });
+  }
+  return liste.filter((x) => !/veri merkezi|profesyonel|quadro|sınıflandırılamadı/i.test(x.ad));
+}
+
+/* ---------- Değerlendirme ---------- */
+function planla(h, zorla) {
+  const S = TABLOLAR.sabitler, M = TABLOLAR.modeller;
+  // Kullanıcı kartını kendisi seçtiyse tespit yerine o kullanılır.
+  if (zorla) {
+    const S = TABLOLAR.sabitler;
+    const p0 = { uyarilar: [], gpuAd: zorla.ad, vram: zorla.vram,
+                 kullaniciSecti: true, yol: "gpu",
+                 motor: "faster-whisper + CUDA (float16)",
+                 cihaz: zorla.ad, sinif: zorla.ad,
+                 bellekGb: Math.max(0, zorla.vram - 1.5), bellekAlani: "vram",
+                 taban: S.gpu_taban_xrt * zorla.endeks,
+                 gecikme: S.baslangic_gecikmesi.gpu, hizAlani: "hiz" };
+    if (/50 serisi \(Blackwell\)/i.test(zorla.ad)) {
+      p0.uyarilar.push(["uyari",
+        "RTX 50 serisi (Blackwell): RadVox'un mevcut CUDA derlemesi bu " +
+        "kuşağı tanımıyor; program çökmez ama ekran kartını kullanamaz ve " +
+        "dikte işlemciye düşer. Giderilebilir bir yazılım kısıtı — " +
+        "donanımınızda sorun yok."]);
+      const pc = { uyarilar: p0.uyarilar, kullaniciSecti: true };
+      return cpuPlani(h, pc);
+    }
+    return modelSec(p0, TABLOLAR.modeller);
+  }
+  const nvidia = /nvidia|geforce|quadro|tesla|rtx|gtx/i.test(h.gpuMetin);
+  // Intel Mac'i Apple Silicon sanmayalım: Intel Mac'ler "Intel Iris" der,
+  // Apple Silicon "Apple M2 Pro" ya da (Safari'de) yalnızca "Apple GPU".
+  const apple = /apple\s*m\d/i.test(h.gpuMetin) ||
+    (h.os.mac && !/intel|radeon|amd|nvidia/i.test(h.gpuMetin));
+  const p = { uyarilar: [], gpuAd: kisalt(h.gpuMetin), vram: 0 };
+
+  if (nvidia) {
+    const [endeks, sinif] = esle(TABLOLAR.gpu_siniflari, h.gpuMetin);
+    const vram = TABLOLAR.vram_tahmini[sinif] || 6;
+    const blackwell = /\b50[6-9]0\b/.test(h.gpuMetin);
+    p.gpuAd = sinif || "NVIDIA";
+    p.vram = vram;
+    if (blackwell) {
+      p.uyarilar.push(["uyari",
+        "Kart RTX 50 serisi (Blackwell) görünüyor. RadVox'un mevcut CUDA " +
+        "derlemesi bu kuşağı tanımıyor; program çökmez ama ekran kartını " +
+        "kullanamaz ve dikte işlemciye düşer. Bu, giderilebilir bir " +
+        "yazılım kısıtıdır — donanımınızda sorun yok."]);
+      return cpuPlani(h, p);
+    }
+    const kullanilirVram = Math.max(0, vram - 1.5);
+    p.yol = "gpu";
+    p.motor = "faster-whisper + CUDA (float16)";
+    // Kullanıcıya kendi kartının adı gösterilir; sınıf etiketi yalnızca
+    // hız ve VRAM tahmininde kullanılır.
+    p.cihaz = p.gpuAd || sinif;
+    p.sinif = sinif;
+    p.bellekGb = kullanilirVram;
+    p.bellekAlani = "vram";
+    p.taban = S.gpu_taban_xrt * (endeks || 0.9);
+    p.gecikme = S.baslangic_gecikmesi.gpu;
+    p.hizAlani = "hiz";
+    return modelSec(p, M);
+  }
+
+  if (apple) {
+    const [endeks, sinif] = esle(TABLOLAR.apple_siniflari, h.gpuMetin);
+    p.yol = "mlx";
+    p.motor = "mlx-whisper (Apple Metal)";
+    p.cihaz = p.gpuAd || sinif || "Apple Silicon";
+    p.sinif = sinif;
+    // Birleşik bellek görünmüyor; en yaygın taban olan 16 GB varsayılır
+    p.bellekGb = 11;
+    p.bellekAlani = "vram";
+    p.taban = S.gpu_taban_xrt * (endeks || 0.7);
+    p.gecikme = S.baslangic_gecikmesi.gpu;
+    p.hizAlani = "hiz";
+    p.uyarilar.push(["bilgi",
+      "Apple Silicon algılandı. Tarayıcı birleşik bellek miktarını " +
+      "göremediği için 16 GB varsayıldı; daha fazlası varsa sonuç daha iyi."]);
+    return modelSec(p, M);
+  }
+  // Tarayıcı ayrı ekran kartını uyandırmıyorsa CPU sonucu bir "cevap"
+  // değil, ALT SINIRDIR. Kesin gibi sunmak, ayrı kartı olan kullanıcıyı
+  // olduğundan kötü göstermek olur — hedef kitlenin çoğu böyle.
+  p.belirsiz = h.yalnizYerlesik || !h.gpuMetin;
+  p.yerlesikAd = h.gpuMetin ? kisalt(h.gpuMetin) : "";
+  return cpuPlani(h, p);
+}
+
+function cpuPlani(h, p) {
+  const S = TABLOLAR.sabitler, M = TABLOLAR.modeller;
+  // Tarayıcı işlemci modelini vermez, yalnızca iş parçacığı sayısını.
+  // Kuşak çarpanı bilinmediği için nötr 1.0 alınır ve fiziksel çekirdek
+  // iş parçacığının yarısı varsayılır.
+  const cekirdek = Math.max(1, Math.round((h.isParcacigi || 4) / 2));
+  const etkin = Math.min(cekirdek, 8) + Math.max(0, cekirdek - 8) * 0.35;
+  p.cpuEndeks = Math.round((etkin / 8) * 100) / 100;
+  p.yol = "cpu";
+  p.motor = "faster-whisper + CPU (int8)";
+  p.cihaz = (h.isParcacigi || "?") + " iş parçacıklı işlemci";
+  p.bellekGb = 13;                     // RAM görünmüyor; 16 GB varsayılır
+  p.bellekAlani = "ram";
+  p.taban = S.cpu_taban_xrt * p.cpuEndeks;
+  p.gecikme = S.baslangic_gecikmesi.cpu;
+  p.hizAlani = "hiz_cpu";
+  return modelSec(p, M);
+}
+
+function modelSec(p, M) {
+  const S = TABLOLAR.sabitler;
+  const sira = p.yol === "cpu"
+    ? ["large-v3-turbo", "medium", "small"]
+    : ["large-v3", "large-v3-turbo", "medium", "small"];
+  p.model = null;
+  for (const ad of sira) {
+    const m = M[ad];
+    if (p.bellekGb < m[p.bellekAlani] * 1.25) continue;
+    const xrt = p.taban * m[p.hizAlani] * S.zaman_damgasi_carpani;
+    if (p.yol === "cpu" && xrt < 0.9 && ad !== "small") continue;
+    p.model = ad; break;
+  }
+  if (!p.model) p.model = "medium";
+  p.satirlar = TABLOLAR.model_sira.map((ad) => {
+    const m = M[ad];
+    const xrt = p.taban * m[p.hizAlani] * S.zaman_damgasi_carpani;
+    return {
+      anahtar: ad, ad: m.ad, parametre: m.parametre, not: m.not,
+      ihtiyac: m[p.bellekAlani], disk: m.disk, wer: m.wer,
+      sigar: p.bellekGb >= m[p.bellekAlani] * 1.25,
+      xrt: xrt,
+      s15: p.gecikme + 15 / xrt, s60: p.gecikme + 60 / xrt,
+      s180: p.gecikme + 180 / xrt,
+      secilen: ad === p.model,
+    };
+  });
+  p.secili = p.satirlar.find((s) => s.secilen);
+  // Python tarafiyla ayni kural: small/base ile dikte kullanilabilir
+  // sayilmaz (%20+ kelime hatasi).
+  p.dikte = !!p.secili && p.secili.xrt >= 0.45 &&
+            p.model !== "small" && p.model !== "base";
+  p.kademe = !p.dikte ? "D"
+    : (p.yol === "cpu" ? "C" : (p.model === "large-v3" ? "A" : "B"));
+  return p;
+}
+
+/* ---------- Çizim ---------- */
+const hizYaz = (x) => x < 10 ? x.toFixed(1) : Math.round(x).toString();
+const snYaz = (x) => x < 10 ? x.toFixed(1) + " sn" : Math.round(x) + " sn";
+
+function ozellikler(p, h) {
+  const saglanan = {
+    her_zaman: true, windows: !h.os.mac, dikte: p.dikte,
+    gpu: (p.yol === "gpu" || p.yol === "mlx") && p.dikte, internet: null,
+  };
+  return TABLOLAR.ozellikler.map((o) => {
+    const v = saglanan[o.kosul];
+    let durum, metin;
+    if (v === null) { durum = "kosullu"; metin = o["not"]; }
+    else if (v) { durum = "var"; metin = o["not"]; }
+    else {
+      durum = o.kosul === "windows" ? "kosullu" : "yok";
+      metin = o["not_alt"] || o["not"];
+    }
+    metin = metin.replace("%(cihaz)s", p.cihaz)
+                 .replace("%(model)s", TABLOLAR.modeller[p.model].ad);
+    return [o.ad, durum, metin];
+  });
+}
+
+function ciz(h, p) {
+  const [kademeAd, renk] = TABLOLAR.kademe[p.kademe];
+  let [baslik, ozet] = TABLOLAR.kademe_metni[p.kademe];
+  const yerine = { urun: TABLOLAR.urun, model: TABLOLAR.modeller[p.model].ad };
+  const koy = (t) => t.replace(/\{urun\}/g, yerine.urun)
+                      .replace(/\{model\}/g, yerine.model);
+  baslik = koy(baslik); ozet = koy(ozet);
+
+  const s = p.secili;
+  const kutular = [
+    ["Ölçülen cihaz", p.yol === "cpu" ? "İşlemci" : p.cihaz,
+     p.yol === "cpu" ? p.cihaz
+       : (p.yol === "gpu" && p.sinif
+            ? p.sinif + " sınıfı · ~" + p.vram + " GB VRAM varsayıldı"
+            : p.motor.split(" +")[0])],
+  ];
+  if (p.dikte) {
+    kutular.push(
+      ["Önerilen model", TABLOLAR.modeller[p.model].ad.replace("Whisper ", ""),
+       TABLOLAR.modeller[p.model].parametre + " parametre"],
+      ["15 saniyelik dikte", snYaz(s.s15),
+       "gerçek zamanın " + hizYaz(s.xrt) + " katı"],
+      ["Beklenen kelime hatası", "%" + s.wer[2] + "–" + s.wer[3],
+       "RadVox düzeltmeleri sonrası · ham %" + s.wer[0] + "–" + s.wer[1]]);
+  } else {
+    // "small sığıyor" ile "small ile dikte olmaz" aynı belgede duramaz
+    const calisan = ozellikler(p, h).filter((o) => o[1] === "var").length;
+    kutular.push(
+      ["Sesli dikte", "Önerilmiyor",
+       "Kullanılabilir doğrulukta model çalışmıyor"],
+      ["Elle rapor modu", "Tam işlevli",
+       "Şablon, sözlük, karşılaştırma, RIS'e yapıştırma"],
+      ["Etkilenmeyen özellik", calisan + " / " + TABLOLAR.ozellikler.length,
+       "Rapor üretimi donanımdan bağımsız çalışır"]);
+  }
+
+  const gorulen = [
+    ["İşletim sistemi", h.os.ad || "okunamadı", h.os.ad ? "ok" : "bilgi"],
+    ["İşlemci", (h.isParcacigi || "?") + " iş parçacığı",
+     h.isParcacigi >= 8 ? "ok" : h.isParcacigi >= 4 ? "uyari" : "bilgi"],
+    ["Ekran kartı", h.gpuMetin ? kisalt(h.gpuMetin) : "tarayıcı vermedi",
+     h.gpuMetin ? "ok" : "bilgi"],
+    ["Ekran çözünürlüğü", h.ekran[0] + " x " + h.ekran[1],
+     h.ekran[0] >= TABLOLAR.ister.ekran_gen_onerilen ? "ok" : "uyari"],
+    ["Mikrofon", h.mikrofon === null ? "sorgulanamadı"
+      : h.mikrofon > 0 ? h.mikrofon + " ses girişi" : "görünmüyor",
+     h.mikrofon ? "ok" : "bilgi"],
+  ];
+  const gorulmeyen = [
+    ["Ekran kartı belleği (VRAM)", "tarayıcıdan okunamaz",
+     p.yol === "gpu" ? "kart modelinden ~" + p.vram + " GB varsayıldı" : "—"],
+    ["Sistem belleği (RAM)", "tarayıcı en fazla 8 GB gösterir",
+     "16 GB varsayıldı"],
+    ["NVIDIA sürücü sürümü", "tarayıcıdan okunamaz",
+     "güncel varsayıldı"],
+    // storage.estimate() gerçek boş alanı değil, tarayıcının o siteye
+    // ayırdığı kotayı verir — sayı olarak göstermek yanıltıcı olur.
+    ["Boş disk alanı", "tarayıcıdan güvenilir okunamaz",
+     "kurulum için " + TABLOLAR.ister.disk_gb_min + " GB gerekir"],
+  ];
+
+  const oz = ozellikler(p, h);
+  const simge = { var: "✓", kosullu: "◐", yok: "✕" };
+  const dsinif = { var: "d-ok", kosullu: "d-uyari", yok: "d-hata" };
+
+  // Ekran kartı görünmüyorsa kesin hüküm verilmez: sonuç alt sınır olarak
+  // sunulur ve kesin cevap için masaüstü aracına yönlendirilir.
+  // Kullanıcı kartını seçtiyse blok kaybolmaz; sakin bir dille kalır ki
+  // seçim değiştirilebilsin ve sonucun beyana dayandığı görünsün.
+  const secimKutusu = `
+    <div class="secim">
+      <label for="kartsec"><b>${p.kullaniciSecti
+        ? "Ekran kartı (sizin seçiminiz)"
+        : "Ekran kartınızı biliyorsanız seçin, sonucu hemen güncelleyeyim:"}</b></label>
+      <select id="kartsec">
+        <option value="">— ayrı ekran kartım yok / bilmiyorum —</option>
+      </select>
+      <p class="kucuk" style="margin:8px 0 0">Kartınızı bilmiyorsanız:
+      <b>Windows + R</b> → <code>dxdiag</code> → <b>Ekran</b> sekmesi.
+      Ya da sayfanın sonundaki aracı çalıştırın; o hiç sormadan okur.</p>
+    </div>`;
+
+  const belirsizBlok = p.kullaniciSecti ? `
+  <div class="karne" style="border-left-color:#b45309">
+    <span class="rozet" style="background:#b45309">SİZİN BEYANINIZA GÖRE</span>
+    <h2>Sonuç seçtiğiniz karta göre hesaplandı</h2>
+    <p>Tarayıcı ekran kartınızı göremediği için aşağıdaki değerlendirme
+    <b>${E(p.gpuAd)}</b> seçiminize dayanıyor — ölçüm değil, beyan.
+    Yanlış seçtiyseniz aşağıdan değiştirin; kesin sonuç için sayfanın
+    sonundaki aracı çalıştırın.</p>
+    ${secimKutusu}
+  </div>` : (p.belirsiz ? `
+  <div class="karne" style="border-left-color:#b45309">
+    <span class="rozet" style="background:#b45309">SONUÇ EKSİK</span>
+    <h2>Ekran kartınızı göremiyorum</h2>
+    <p>Tarayıcı${p.yerlesikAd ? " yalnızca yerleşik grafik birimini (" +
+      E(p.yerlesikAd) + ") gösteriyor" : " ekran kartı bilgisi vermedi"}.
+    Dizüstü bilgisayarlarda bu çok sık olur: tarayıcı güç tasarrufu için
+    ayrı ekran kartını hiç uyandırmaz. <b>Ayrı bir NVIDIA kartınız varsa
+    aşağıdaki sonuç onu saymıyor</b> ve gerçek performans belirgin daha
+    iyidir.</p>
+    <p style="margin-top:12px"><b>Aşağıdaki değerlendirme, ayrı ekran
+    kartı yokmuş gibi hesaplandı — yani <u>en kötü durum</u>.</b></p>
+    ${secimKutusu}
+  </div>` : "");
+
+  return belirsizBlok + `
+  <div class="karne" style="border-left-color:${renk}">
+    <span class="rozet" style="background:${renk}">KADEME ${p.kademe}${
+      (p.belirsiz && !p.kullaniciSecti) ? " · en az" : ""} · ${E(kademeAd)}</span>
+    <h2>${E(p.belirsiz && !p.kullaniciSecti
+        ? "Ayrı ekran kartı yoksa: " + baslik : baslik)}</h2>
+    <p>${E(ozet)}</p>
+  </div>
+  <div class="kutular">${kutular.map(([a, b, c]) => `
+    <div class="kutu" style="border-top-color:${renk}">
+      <div class="etiket">${E(a)}</div><div class="deger">${E(b)}</div>
+      <div class="alt">${E(c)}</div></div>`).join("")}</div>
+
+  ${p.uyarilar.length ? `<h2>Bulgular</h2><ul class="mesaj">${p.uyarilar.map(
+    ([sv, m]) => `<li class="m-${sv} mesaj-b"><b>${sv === "uyari" ? "Dikkat" : "Not"}</b>${E(m)}</li>`
+  ).join("")}</ul>` : ""}
+
+  <h2>Tarayıcının görebildikleri</h2>
+  <table>${gorulen.map(([a, b, d]) => `<tr><td><b>${E(a)}</b></td><td>${E(b)}</td>
+    <td class="d d-${d}">${d === "ok" ? "✓" : d === "uyari" ? "!" : "i"}</td></tr>`).join("")}</table>
+
+  <h2>Tarayıcının göremedikleri <span>— kademe bu yüzden temkinli</span></h2>
+  <table>${gorulmeyen.map(([a, b, c]) => `<tr><td><b>${E(a)}</b></td>
+    <td>${E(b)}</td><td class="aciklama" style="margin:0">${E(c)}</td></tr>`).join("")}</table>
+  <div class="notlar"><b>Bu yüzden sonuç bir tahmindir.</b>
+  Ekran kartı belleği ve sürücü sürümü tarayıcıdan okunamaz; bunlar
+  hangi modelin çalışacağını doğrudan belirleyen iki bilgidir. Aşağıdaki
+  masaüstü aracı bunları gerçekten okur ve kesin sonucu verir.</div>
+
+  <h2>Hangi model çalışır? <span>— süreler öngörüdür</span></h2>
+  <div class="kaydir"><table>
+  <tr><th>Model</th><th>Durum</th><th>Hız</th><th>15 sn</th><th>1 dk</th>
+      <th>3 dk</th><th>Ham WER</th><th>Düzeltilmiş</th></tr>
+  ${p.satirlar.map((r) => `<tr class="${(r.secilen && p.dikte) ? "secili" : r.sigar ? "" : "solgun"}">
+    <td>${E(r.ad)}${(r.secilen && p.dikte) ? " &nbsp;<b>← önerilen</b>" : ""}
+      <span class="aciklama">${E(r.parametre)} · ${E(r.not)}</span></td>
+    <td>${r.sigar ? `<span class="d d-${r.xrt >= 1 ? "ok" : "uyari"}">${r.xrt >= 1 ? "çalışır" : "yavaş"}</span>`
+        : '<span class="d d-hata">sığmaz</span>'}</td>
+    <td class="sayi">${r.sigar ? hizYaz(r.xrt) + "x" : "—"}</td>
+    <td class="sayi">${r.sigar ? snYaz(r.s15) : "—"}</td>
+    <td class="sayi">${r.sigar ? snYaz(r.s60) : "—"}</td>
+    <td class="sayi">${r.sigar ? snYaz(r.s180) : "—"}</td>
+    <td class="sayi">%${r.wer[0]}–${r.wer[1]}</td>
+    <td class="sayi"><b>%${r.wer[2]}–${r.wer[3]}</b></td></tr>`).join("")}
+  </table></div>
+
+  <h2>Bu bilgisayarda hangi özellikler çalışır?</h2>
+  <div class="oz">${oz.map(([ad, durum, nt]) => `
+    <div class="oz-sat ${durum === "yok" ? "yok" : ""}">
+      <div class="im ${dsinif[durum]}">${simge[durum]}</div>
+      <div><div class="ad">${E(ad)}</div><div class="nt">${E(nt)}</div></div>
+    </div>`).join("")}</div>
+
+  ${TABLOLAR.wer_metni}
+
+  <div class="cta">
+    <h2>Kesin sonuç için masaüstü aracı</h2>
+    <p>Tarayıcı ekran kartı belleğini, sürücü sürümünü ve gerçek belleği
+    göremez. 5 MB'lık araç bunları okur ve yazdırılabilir bir uygunluk
+    belgesi üretir. Kurulum yok — indirin, çift tıklayın.</p>
+    <a class="dugme" href="${RELEASE_URL}">Aracı indir (5 MB)</a>
+    <p class="kucuk">Windows "bilinmeyen yayımcı" uyarısı verecek — araç kod
+    imzası taşımıyor. <a class="ince" href="https://github.com/Coder-Radiologist/radvox-compatibility#windows-uyarısı--göreceğiniz-ekran">Neden
+    ve nasıl geçilir</a> · <a class="ince" href="https://github.com/Coder-Radiologist/radvox-compatibility">kaynak kodu</a></p>
+  </div>`;
+}
+
+function kisalt(s) {
+  const m = s.match(/(NVIDIA[^,()|]*|AMD[^,()|]*|Intel[^,()|]*|Apple[^,()|]*)/i);
+  return (m ? m[1] : s).trim().slice(0, 60);
+}
+
+/* ---------- Başlat ---------- */
+(async function () {
+  document.getElementById("surum").textContent = TABLOLAR.surum;
+  try {
+    const h = await tespit();
+    if (h.mobil) {
+      document.getElementById("mobil").style.display = "block";
+    }
+    const kap = document.getElementById("sonuc");
+    const secenekler = kartSecenekleri();
+
+    function goster(zorla) {
+      const p = planla(h, zorla);
+      kap.innerHTML = ciz(h, p);
+      kap.style.display = "block";
+      const sec = document.getElementById("kartsec");
+      if (!sec) return;
+      secenekler.forEach((o, i) => {
+        const el = document.createElement("option");
+        el.value = String(i);
+        el.textContent = o.ad + " (~" + o.vram + " GB)";
+        sec.appendChild(el);
+      });
+      if (zorla) sec.value = String(secenekler.indexOf(zorla));
+      sec.addEventListener("change", () => {
+        const v = sec.value;
+        goster(v === "" ? null : secenekler[Number(v)]);
+        kap.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+
+    document.getElementById("olcum").style.display = "none";
+    goster(null);
+  } catch (e) {
+    document.getElementById("olcum").innerHTML =
+      '<div class="kucuk">Ölçüm tamamlanamadı (' + E(e.message) + ').<br>' +
+      'Masaüstü aracı bu sorundan etkilenmez: ' +
+      '<a href="' + RELEASE_URL + '">indirin</a>.</div>';
+  }
+  const btn = document.getElementById("kopyala");
+  if (btn) btn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(location.href);
+      document.getElementById("kopyalandi").style.display = "block";
+    } catch (e) {
+      prompt("Bağlantıyı kopyalayın:", location.href);
+    }
+  });
+})();
+</script>
+</body>
+</html>
